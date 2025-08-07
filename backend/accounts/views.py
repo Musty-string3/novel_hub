@@ -23,12 +23,6 @@ class TopView(APIView):
 class SignUpView(APIView):
     def post(self, request, *args, **kwargs):
 
-        ## ! テスト用
-        # {
-        #     "email": "hoge@da.com",
-        #     "password": "hogehoge1"
-        # }
-
         email = request.data.get("email")
         password = request.data.get("password")
 
