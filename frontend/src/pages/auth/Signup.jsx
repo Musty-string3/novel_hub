@@ -1,40 +1,36 @@
 import React, { useState } from 'react'
-import api from '../../utils/api';
 import { RiMailSendLine } from "react-icons/ri";
 import { Spinner } from '@chakra-ui/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { signUpWithLocal } from '../../features/user/userSlice';
 
 const Signup = () => {
+
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user);
 
     const [email ,setEmail] = useState("");
     const [password ,setPassword] = useState("");
     const [message ,setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
     const [isEmailSent ,setIsEmailSent] = useState(false);
 
 
     // Django側にリクエストを飛ばし、結果を返す
     const handleSubmit = async (e) => {
-        setLoading(true);
         e.preventDefault();
 
         try {
-            const response = await api.post(
-                "/accounts/signup",
-                {
-                    email,
-                    password
-                }
-            );
-            setMessage(response.data.message);
+            const response = await dispatch(signUpWithLocal({ email, password })).unwrap();
+            console.log("response: ", response);
+            setMessage(response.message);
             setIsEmailSent(true);
         } catch (error) {
+            console.log("error:", error);
             if (error.response) {
                 setMessage(error.response.data.message || "ユーザー登録に失敗しました。");
             } else {
                 setMessage("通信エラーが発生しました。");
             }
-        } finally {
-            setLoading(false);
         }
         return
     };
@@ -42,7 +38,7 @@ const Signup = () => {
     return (
         <div>
             <h2>新期登録</h2>
-            {!loading ? (
+            {!user.loading ? (
                 <>
                     {message && <div className="">{ message }</div>}
                     {isEmailSent ? (
@@ -62,6 +58,7 @@ const Signup = () => {
                                     value={email}
                                     onChange={(e) => {setEmail(e.target.value)}}
                                     required
+                                    autoComplete="email"
                                 />
                             </div>
                             <div className="">
@@ -75,6 +72,7 @@ const Signup = () => {
                                     value={password}
                                     onChange={(e) => {setPassword(e.target.value)}}
                                     required
+                                    autoComplete="new-password"
                                 />
                             </div>
                             <div className="">

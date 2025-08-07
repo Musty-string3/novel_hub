@@ -63,7 +63,7 @@ class SignUpView(APIView):
             algorithm="HS256"
         )
 
-        # 認証URL作成
+        # 認証URL作成する（React側のドメインを元にURLを生成する）
         if settings.FRONTEND_URL:
             verify_url = f"{settings.FRONTEND_URL}/accounts/verify_email?token={token}"
         else:
@@ -81,7 +81,10 @@ class SignUpView(APIView):
                 "message": "登録されたメールアドレスに認証メールを送信しました。",
                 "user": {
                     "id": user.id,
-                    "email": user.email
+                    "email": user.email,
+                    "provider": "local",
+                    "created_at": user.created_at.strftime("%Y-%m-%d %H:%M"),
+                    "updated_at": user.updated_at.strftime("%Y-%m-%d %H:%M"),
                 },
                 "refresh": str(refresh),
                 "access": access_token
