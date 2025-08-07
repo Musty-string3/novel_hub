@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.venv/
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+
+# Migrations
+*/migrations/*
+!*/migrations/__init__.py
+
+# Media and Static files
+/media
+/staticfiles
+
+# Environment variables
+.env
+
+# IDE/Editor settings
+.vscode/
+.idea/
+
+# Docker
+*.pid
+
+/docker/command_list.md
