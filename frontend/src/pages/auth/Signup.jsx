@@ -25,12 +25,7 @@ const Signup = () => {
             setMessage(response.message);
             setIsEmailSent(true);
         } catch (error) {
-            console.log("error:", error);
-            if (error.response) {
-                setMessage(error.response.data.message || "ユーザー登録に失敗しました。");
-            } else {
-                setMessage("通信エラーが発生しました。");
-            }
+            setMessage(error || "ユーザー登録に失敗しました。");
         }
         return
     };

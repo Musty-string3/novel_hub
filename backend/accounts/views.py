@@ -7,12 +7,13 @@ from datetime import datetime, timedelta, timezone
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from common.email_manager import signup_verify_email
-
 from .models import *
+from common.email_manager import signup_verify_email
+from .serializers import UserSerializer
 
 
 class TopView(APIView):
@@ -22,6 +23,12 @@ class TopView(APIView):
 
 class SignUpView(APIView):
     def post(self, request, *args, **kwargs):
+        """
+        メールアドレスとパスワードでのユーザー新規登録
+
+        ここでは仮のユーザー登録を行い、まだログインはできない状態
+        VerifyEmailViewでメール認証後に初めてログインができる状態にする
+        """
 
         email = request.data.get("email")
         password = request.data.get("password")
@@ -95,6 +102,14 @@ class SignUpView(APIView):
 ## 新規ユーザー登録のメール認証
 class VerifyEmailView(APIView):
     def get(self, request, *args, **kwargs):
+        """
+        メールアドレスとパスワードでのユーザー新規登録（仮）後のメール認証
+
+        メール認証の有効期間をここで設定している
+        メール認証が成功すれば初めてログインができる
+        TODO メール認証ができなかったユーザーはその後に同じメールアドレスでログインができなくなるので、対応する必要あり
+        """
+
         token = request.GET.get("token")
 
         ## トークンが存在しない場合はその場で処理終了
@@ -132,3 +147,16 @@ class VerifyEmailView(APIView):
         ## そもそもユーザーが取得できない場合
         except User.DoesNotExist:
             return Response({"message": "ユーザーが見つかりません。"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MeView(APIView):
+    ## ログインしていない時はアクセスできない
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        ログイン中のユーザー情報を返す
+        """
+
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

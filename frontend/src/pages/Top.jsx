@@ -5,8 +5,7 @@ import { Link } from "react-router-dom";
 const Top = () => {
     return (
         <div>
-            <Link to="accounts">アカウント</Link>
-            
+            <Link to="profile">プロフィールへ</Link>
         </div>
     )
 }

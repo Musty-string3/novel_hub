@@ -1,10 +1,25 @@
 import axios from 'axios';
 
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+// トークンなしのAPI
+export const api = axios.create({
+    baseURL,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-export default api
+// トークンありのAPI
+export const authApi = () => {
+    // TODO: ローカルストレージに保存していたアクセストークンを削除（そもそもローカルストレージには保存したくないので修正する）
+    const accessToken = localStorage.getItem("accessToken");
+
+    return axios.create({
+        baseURL,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+        }
+    })
+};

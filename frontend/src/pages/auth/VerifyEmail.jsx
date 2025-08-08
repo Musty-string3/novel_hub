@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
-import api from '../../utils/api';
+import { api } from '../../utils/api';
 import { Box, Spinner, Text } from '@chakra-ui/react';
 
 const VerifyEmail = () => {

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../utils/api";
+import { api, authApi } from "../../utils/api";
 
 
 const initialState = {
@@ -49,6 +49,32 @@ const userSlice = createSlice({
             state.error = action.payload;
             state.loading = false;
         })
+
+        // 自身のユーザー情報を取得
+        builder.addCase(fetchMe.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(fetchMe.fulfilled, (state, action) => {
+            const user = action.payload;
+
+            state.id = user.id;
+            state.email = user.email;
+            state.provider = user.provider;
+            state.provider_id = user.provider_id;
+            state.created_at = user.created_at;
+            state.updated_at = user.updated_at;
+            state.theme_preference = user.theme_preference;
+            state.is_active = user.is_active;
+            state.is_staff = user.is_staff;
+
+            state.loading = false;
+            state.error = null;
+            state.isAuthenticated = true;
+        })
+        .addCase(fetchMe.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
     }
 })
 
@@ -87,6 +113,22 @@ export const signUpWithLocal = createAsyncThunk(
         }
     }
 );
+
+
+export const fetchMe = createAsyncThunk(
+    "user/fetchMe",
+    async (_, thunkAPI) => {
+        try {
+            // responseで返ってくるのはユーザーの全ての情報
+            const response = await authApi().get("/accounts/me");
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.message || "ユーザー情報の取得に失敗しました。");
+        }
+    }
+);
+
+
 
 export const { logout } = userSlice.actions;
 export default userSlice.reducer

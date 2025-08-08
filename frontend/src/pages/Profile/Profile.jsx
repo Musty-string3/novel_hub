@@ -1,21 +1,43 @@
 import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+import { fetchMe } from '../../features/user/userSlice';
+import LoadingSpinner from '../../components/LoadingSpinner';
+
 
 const Profile = () => {
-    const [message, setMessage] = useState("");
+    const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
 
-    // 初回起動時にリクエスト送る
-    // TODO: API通信はutilsフォルダに移行する
+    // ユーザー状態を取得
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/accounts/")
-            .then((res) => res.json())
-            .then((data) => setMessage(data.message))
-            .catch((err) => console.error(err))
-    }, []);
+        const getMe = async () => {
+            dispatch(fetchMe());
+        };
+        getMe();
+    }, [dispatch]);
+
+    if (user.loading) return <LoadingSpinner />;
 
     return (
         <div>
-            <h1>accountsからのレスポンスです。</h1>
-            <p>メッセージ内容:{message}</p>
+            {user?.error && user.error}
+            {user?.isAuthenticated ? (
+                <div className="">
+                    <h1>あなたの情報</h1>
+                    <p>id: { user.id }</p>
+                    <p>id: { user.email }</p>
+                    <div>
+                        <Link to="/logout">ログアウト</Link>
+                    </div>
+                </div>
+            ) : (
+                <Link to="/login">ログイン</Link>
+            )}
+            <div className="">
+                <Link to="/">トップへ</Link>
+            </div>
         </div>
     )
 }
