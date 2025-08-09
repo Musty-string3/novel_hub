@@ -7,12 +7,12 @@ class CustomUserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("ステータス", {"fields": ("email_verified", "is_active", "is_staff")}),
-        ("カラム", {"fields": ("provider", "provider_id", "theme_preference")}),
+        ("カラム", {"fields": ("provider", "provider_id", "last_login", "theme_preference")}),
     )
 
     list_display = ("id", "email", "provider",  "is_staff", "is_active", "last_login", "created_at", "updated_at")
     search_fields = ("email",)
-    ordering = ("email",)
+    ordering = ("id",)
 
 
 class CustomProfileAdmin(admin.ModelAdmin):

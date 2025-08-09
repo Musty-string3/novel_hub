@@ -128,7 +128,8 @@ class VerifyEmailView(APIView):
 
             user.is_active = True
             user.email_verified = True
-            user.save(update_fields=["is_active", "email_verified", "updated_at"])
+            user.last_login = datetime.now()
+            user.save(update_fields=["is_active", "email_verified", "last_login", "updated_at"])
 
             return Response({
                 "message": "メールアドレスが認証されました。",
