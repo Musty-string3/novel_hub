@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { RiMailSendLine } from "react-icons/ri";
-import { Spinner } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUpWithLocal } from '../../features/user/userSlice';
+import { toaster } from '../../components/ui/toaster';
+import { useRedirectIfAuthenticated } from '../../hooks/useRedirectIfAuthenticated';
 
 const Signup = () => {
 
@@ -14,18 +15,37 @@ const Signup = () => {
     const [message ,setMessage] = useState("");
     const [isEmailSent ,setIsEmailSent] = useState(false);
 
+    useRedirectIfAuthenticated();
+
 
     // Django側にリクエストを飛ばし、結果を返す
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const signupPromise = dispatch(signUpWithLocal({ email, password })).unwrap();
+        toaster.promise(signupPromise, {
+            loading: {
+                title: "ユーザー新規登録中...",
+                description: "しばらくお待ちください",
+                closable: true,
+            },
+            success: {
+                title: "ユーザー新規登録に成功しました。",
+                description: "",
+                closable: true,
+            },
+        });
         try {
-            const response = await dispatch(signUpWithLocal({ email, password })).unwrap();
-            console.log("response: ", response);
-            setMessage(response.message);
+            const result = await signupPromise;
+            setMessage(result.message);
             setIsEmailSent(true);
         } catch (error) {
-            setMessage(error || "ユーザー登録に失敗しました。");
+            toaster.create({
+                title: "ログインに失敗しました。",
+                description: error,
+                type: "error",
+                closable: true,
+            });
         }
         return
     };
@@ -33,9 +53,9 @@ const Signup = () => {
     return (
         <div>
             <h2>新期登録</h2>
-            {!user.loading ? (
+            {message && <div className="">{ message }</div>}
+            {!user.loading && (
                 <>
-                    {message && <div className="">{ message }</div>}
                     {isEmailSent ? (
                         <div className=''>
                             <RiMailSendLine />
@@ -76,8 +96,6 @@ const Signup = () => {
                         </form>
                     )}
                 </>
-            ) : (
-                <Spinner animationDuration="0.7s"/>
             )}
         </div>
     )

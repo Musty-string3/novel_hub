@@ -115,6 +115,30 @@ export const signUpWithLocal = createAsyncThunk(
 );
 
 
+export const loginWithLocal = createAsyncThunk(
+    "user/loginWithLocal",
+    async ({email, password}, thunkAPI) => {
+        try {
+            const response = await api.post(
+                "accounts/login",
+                {email, password}
+            );
+            // ログインに成功するとアクセストークンとリフレッシュトークンを取得できる
+            const {access, refresh} = response.data;
+            // TODO: ローカルストレージに保存していたアクセストークンを削除（そもそもローカルストレージには保存したくないので修正する）
+            localStorage.setItem("accessToken", access);
+
+            // ログインに成功したらfetchMeで自身の情報を取得する
+            const me = await thunkAPI.dispatch(fetchMe());
+            return me.payload;
+
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error?.response?.data?.non_field_errors[0] || "ログインに失敗しました。");
+        }
+    }
+);
+
+
 export const fetchMe = createAsyncThunk(
     "user/fetchMe",
     async (_, thunkAPI) => {
