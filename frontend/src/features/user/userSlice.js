@@ -13,6 +13,7 @@ const initialState = {
     error: null,
     isAuthenticated: false,
     theme_preference: null,
+    profile: [],
     is_active: false,
     is_staff: false,
 };
@@ -21,13 +22,7 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        // ログアウトはAPI経由ではなくフロント側だけで行えば良いので同期通信で行う
-        // TODO セッション情報などをサーバー側で保管している場合はextraReducersにしてAPI経由でログアウトさせる
-        logout() {
-            // TODO: ローカルストレージに保存していたアクセストークンを削除（そもそもローカルストレージには保存したくないので修正する）
-            localStorage.removeItem("accessToken");
-            return initialState;
-        },
+        // 今の所なし
     },
     extraReducers: (builder) => {
         // ユーザー新規登録の処理中はローディングの表示をさせる
@@ -46,6 +41,45 @@ const userSlice = createSlice({
             state.loading = false;
         })
         .addCase(signUpWithLocal.rejected, (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        })
+
+        // ユーザー新規登録時のメール認証
+        builder.addCase(verifyEmail.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(verifyEmail.fulfilled, (state, action) => {
+            const user = action.payload;
+            console.log(`user: ${user}`);
+
+            state.id = user.id;
+            state.email = user.email;
+            state.provider = user.provider;
+            state.provider_id = user.provider_id;
+            state.created_at = user.created_at;
+            state.updated_at = user.updated_at;
+            state.theme_preference = user.theme_preference;
+            state.is_active = user.is_active;
+            state.is_staff = user.is_staff;
+
+            state.loading = false;
+            state.error = null;
+            state.isAuthenticated = true;
+        })
+        .addCase(verifyEmail.rejected, (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        })
+
+        // ログアウト
+        builder.addCase(logoutUser.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(logoutUser.fulfilled, (state) => {
+            return initialState;
+        })
+        .addCase(logoutUser.rejected, (state, action) => {
             state.error = action.payload;
             state.loading = false;
         })
@@ -78,7 +112,7 @@ const userSlice = createSlice({
     }
 })
 
-// メールアドレスとパスワードでのユーザー登録を行う関数（非同期）
+// メールアドレスとパスワードでのユーザー仮登録を行う関数（非同期）
 export const signUpWithLocal = createAsyncThunk(
     "user/signUpWithLocal",
     async ({ email, password }, thunkAPI) => {
@@ -92,10 +126,12 @@ export const signUpWithLocal = createAsyncThunk(
             const user = response.data.user;
             // Django側で発行したJWTのアクセストークン
             const accessToken = response.data.access;
+            const refreshToken = response.data.refresh;
             const message = response.data.message;
 
             // TODO: ローカルストレージで危ないので、アクセストークンはHttpOnly Cookieに保存する
             localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
 
             // returnの中身はextraReducersのfulfilledに向けて飛ばす
             // Reduxにユーザー情報を保存するため
@@ -115,6 +151,21 @@ export const signUpWithLocal = createAsyncThunk(
 );
 
 
+// サインアップ後のメール認証時
+export const verifyEmail = createAsyncThunk(
+    "user/verifyEmail",
+    async({token}, thunkAPI) => {
+        try {
+            const response = await api.get(`/accounts/verify_email?token=${token}`);
+            return response.data.user;
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error?.response?.data?.message || "メール認証に失敗しました。");
+        }
+
+    }
+);
+
+
 export const loginWithLocal = createAsyncThunk(
     "user/loginWithLocal",
     async ({email, password}, thunkAPI) => {
@@ -127,6 +178,7 @@ export const loginWithLocal = createAsyncThunk(
             const {access, refresh} = response.data;
             // TODO: ローカルストレージに保存していたアクセストークンを削除（そもそもローカルストレージには保存したくないので修正する）
             localStorage.setItem("accessToken", access);
+            localStorage.setItem("refreshToken", refresh);
 
             // ログインに成功したらfetchMeで自身の情報を取得する
             const me = await thunkAPI.dispatch(fetchMe());
@@ -137,6 +189,34 @@ export const loginWithLocal = createAsyncThunk(
         }
     }
 );
+
+
+export const logoutUser = createAsyncThunk(
+    "user/logoutUser",
+    async(_, thunkAPI) => {
+        // TODO: ローカルストレージには保存しておかないこと
+        const refreshToken = localStorage.getItem("refreshToken");
+        // リフレッシュトークンがない場合、または連続でログアウト処理が走った場合は処理しない
+        if (!refreshToken) {
+            return true;
+        }
+
+        try {
+            console.log("ログアウトの実施");
+            await authApi().post(
+                "accounts/logout",
+                {"refresh": refreshToken},
+            );
+
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            return true;
+        } catch(error) {
+            console.log(`ログアウトに失敗；エラー：${error}`);
+            thunkAPI.rejectWithValue(error?.response?.data?.message || "ログアウトに失敗しました。")
+        }
+    }
+)
 
 
 export const fetchMe = createAsyncThunk(

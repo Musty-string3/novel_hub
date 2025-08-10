@@ -186,6 +186,29 @@ class MeView(APIView):
         return
 
 
+class LogoutView(APIView):
+    def post(self, request):
+        """
+        ログアウト処理
+
+        フロントからリフレッシュトークンを発行しそれを取得
+        受け取ったリフレッシュトークンは使えないようにブラックリスト化する
+        """
+
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"message": "トークンがありません。"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception as e:
+            print(f"エラーが発生: {e}")
+            ## すでにブラックリスト化している場合も成功扱い
+        return Response(status=status.HTTP_205_RESET_CONTENT)
+
+
+
 class ProfileView(APIView):
     ## ログインしていない時はアクセスできない
     permission_classes = [IsAuthenticated]

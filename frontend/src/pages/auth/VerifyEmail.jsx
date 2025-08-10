@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { Box, Spinner, Text } from '@chakra-ui/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyEmail } from '../../features/user/userSlice';
 
 const VerifyEmail = () => {
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user);
 
     const [searchParams] = useSearchParams();
     const [message, setMessage] = useState("");
@@ -26,7 +30,7 @@ const VerifyEmail = () => {
 
         const verify = async () => {
             try {
-                const response = await api.get(`/accounts/verify_email?token=${token}`);
+                const response = await dispatch(verifyEmail(token)).unwrap();
                 setMessage(response.data.message);
             } catch (error) {
                 setMessage(error.response.data.message);
