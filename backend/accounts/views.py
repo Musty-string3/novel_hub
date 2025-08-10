@@ -9,11 +9,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import *
 from common.email_manager import signup_verify_email
-from .serializers import UserSerializer
+from .serializers import *
 
 
 class TopView(APIView):
@@ -131,9 +132,11 @@ class VerifyEmailView(APIView):
             user.last_login = datetime.now()
             user.save(update_fields=["is_active", "email_verified", "last_login", "updated_at"])
 
+            serializer = UserSerializer(user)
+
             return Response({
                 "message": "メールアドレスが認証されました。",
-                "user_id": user.id,
+                "user": serializer.data,
                 }, status=status.HTTP_200_OK
             )
 
@@ -150,6 +153,18 @@ class VerifyEmailView(APIView):
             return Response({"message": "ユーザーが見つかりません。"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    メールアドレスとパスワードでのログイン
+
+    本来であればTokenObtainPairViewで足りるが、
+    メールアドレスまたはパスワードが間違っていた際のエラーメッセージを出したいためカスタムViewで作成
+    """
+
+    print("ログイン実施")
+    serializer_class = CustomTokenObtainPairSerializer
+
+
 class MeView(APIView):
     ## ログインしていない時はアクセスできない
     permission_classes = [IsAuthenticated]
@@ -160,4 +175,51 @@ class MeView(APIView):
         """
 
         serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        """
+        ログインユーザーの情報を書き換える
+
+        ダークモード設定などがありえる
+        """
+        return
+
+
+class ProfileView(APIView):
+    ## ログインしていない時はアクセスできない
+    permission_classes = [IsAuthenticated]
+
+    def _get_profile(self, user):
+        try:
+            profile = Profile.objects.get(user=user)
+        except Profile.DoesNotExist:
+            return False
+        return profile
+
+    def get(self, request, *args, **kwargs):
+        """
+        プロフィール情報の取得
+        """
+
+        print(f"request: {request}")
+        print(f"request.user: {request.user}")
+
+        profile = self._get_profile(request.user)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def patch(self, request, *args, **kwargs):
+        """
+        プロフィール情報の変更
+        """
+
+        profile = self._get_profile(request.user)
+        ## NOTE 第一引数に変更したい対象のインスタンス、第二引数に変更したいデータ、第三引数は渡したフィールドのデータだけ書き換える（Falseなら全て書き換え）
+        serializer = ProfileSerializer(profile, request.data, partial=True)
+        ## NOTE バリデーションが不正な場合はValidationErrorで400エラーで返す
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
         return Response(serializer.data, status=status.HTTP_200_OK)
