@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -101,5 +103,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         ## ユーザー情報を取得できないときはエラーメッセージを吐かせる
         if not user:
             raise serializers.ValidationError("メールアドレスまたはパスワードが違います")
+
+        user.last_login = datetime.now()
+        user.save(update_fields=["last_login", "updated_at"])
 
         return super().validate(attrs)

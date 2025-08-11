@@ -161,7 +161,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     メールアドレスまたはパスワードが間違っていた際のエラーメッセージを出したいためカスタムViewで作成
     """
 
-    print("ログイン実施")
     serializer_class = CustomTokenObtainPairSerializer
 
 

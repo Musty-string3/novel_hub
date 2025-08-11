@@ -26,10 +26,12 @@ const Profile = () => {
             {user?.isAuthenticated ? (
                 <div className="">
                     <h1>あなたの情報</h1>
-                    <p>id: { user.id }</p>
-                    <p>id: { user.email }</p>
+                    <p>ニックネーム: { user.profile.name }</p>
+                    <p>自己紹介: { user.profile.bio }</p>
+                    <p>プロフィール公開設定: { user.profile.is_public ? "公開" : "非公開" }</p>
                     <div>
                         <Link to="/logout">ログアウト</Link>
+                        <Link to="/profile/update">プロフィール編集</Link>
                     </div>
                 </div>
             ) : (

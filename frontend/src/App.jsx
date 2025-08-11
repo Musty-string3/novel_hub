@@ -9,6 +9,7 @@ import { Toaster } from "./components/ui/toaster";
 
 import './App.css'
 import Logout from './pages/auth/Logout'
+import ProfileUpdate from './pages/Profile/ProfileUpdate'
 
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Top />} />
 				<Route path="/profile" element={<Profile />} />
-				{/* <Route path="/profile/update" element={<ProfileUpdate />} /> */}
+				<Route path="/profile/update" element={<ProfileUpdate />} />
 				<Route path="/signup" element={<Signup />} />
 				<Route path="/accounts/verify_email" element={<VerifyEmail />} />
 				<Route path="/logout" element={<Logout />} />

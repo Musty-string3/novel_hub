@@ -13,7 +13,7 @@ const initialState = {
     error: null,
     isAuthenticated: false,
     theme_preference: null,
-    profile: [],
+    profile: {},
     is_active: false,
     is_staff: false,
 };
@@ -63,6 +63,15 @@ const userSlice = createSlice({
             state.is_active = user.is_active;
             state.is_staff = user.is_staff;
 
+            state.profile = {
+                'id': user.profile.id,
+                'name': user.profile.name,
+                'bio': user.profile.bio,
+                'is_public': user.profile.is_public,
+                'created_at': user.profile.created_at,
+                'updated_at': user.profile.updated_at,
+            }
+
             state.loading = false;
             state.error = null;
             state.isAuthenticated = true;
@@ -101,11 +110,42 @@ const userSlice = createSlice({
             state.is_active = user.is_active;
             state.is_staff = user.is_staff;
 
+            state.profile = {
+                'id': user.profile.id,
+                'name': user.profile.name,
+                'bio': user.profile.bio,
+                'is_public': user.profile.is_public,
+                'created_at': user.profile.created_at,
+                'updated_at': user.profile.updated_at,
+            }
+
             state.loading = false;
             state.error = null;
             state.isAuthenticated = true;
         })
         .addCase(fetchMe.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+
+        // プロフィール情報を変更
+        builder.addCase(updateProfile.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(updateProfile.fulfilled, (state, action) => {
+            const profile = action.payload;
+
+            state.profile = {
+                'id': profile.id,
+                'name': profile.name,
+                'bio': profile.bio,
+                'is_public': profile.is_public,
+                'created_at': profile.created_at,
+                'updated_at': profile.updated_at,
+            }
+            state.loading = false;
+        })
+        .addCase(updateProfile.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })
@@ -231,6 +271,21 @@ export const fetchMe = createAsyncThunk(
         }
     }
 );
+
+export const updateProfile = createAsyncThunk(
+    "user/updateProfile",
+    async(profileData, thunkAPI) => {
+        try {
+            const response = await authApi().patch(
+                "accounts/profile",
+                profileData,
+            );
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.message || "プロフィール情報の変更に失敗しました。");
+        }
+    }
+)
 
 
 

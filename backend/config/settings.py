@@ -120,13 +120,15 @@ ACCOUNT_USERNAME_REQUIRED = False
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    ## DRFのみ時間の表示形式を変更
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
 }
 
 ## JWT設定
 SIMPLE_JWT = {
-    # アクセストークン(1時間)
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    # アクセストークン(24時間)
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     # リフレッシュトークン(3日)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
     # 認証タイプ
