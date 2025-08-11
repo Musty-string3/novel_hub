@@ -31,7 +31,10 @@ const Profile = () => {
                     <p>プロフィール公開設定: { user.profile.is_public ? "公開" : "非公開" }</p>
                     <div>
                         <Link to="/logout">ログアウト</Link>
+                        <br />
                         <Link to="/profile/update">プロフィール編集</Link>
+                        <br />
+                        <Link to="/folder">フォルダ</Link>
                     </div>
                 </div>
             ) : (
