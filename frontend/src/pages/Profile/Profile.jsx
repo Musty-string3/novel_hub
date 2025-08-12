@@ -34,7 +34,7 @@ const Profile = () => {
                         <br />
                         <Link to="/profile/update">プロフィール編集</Link>
                         <br />
-                        <Link to="/folder">フォルダ</Link>
+                        <Link to="/folders">フォルダ</Link>
                     </div>
                 </div>
             ) : (

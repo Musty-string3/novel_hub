@@ -9,11 +9,11 @@ const initialState = [];
 const folderReducer = (state, {type, payload}) => {
     console.log(payload);
     switch (type) {
-        case "foldersList": {
+        case "folders/list": {
             return payload;
         }
-        case "hogehoge2": {
-            return
+        case "folders/upsert": {
+            return state;
         }
         default: {
             return state;

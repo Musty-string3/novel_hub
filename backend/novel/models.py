@@ -20,7 +20,7 @@ class Folder(models.Model):
 
 class Novel(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="ユーザー", on_delete=models.CASCADE, related_name="novels")
-    folder = models.ForeignKey(Folder, verbose_name="フォルダ", on_delete=models.CASCADE, related_name="novel")
+    folder = models.ForeignKey(Folder, verbose_name="フォルダ", on_delete=models.CASCADE, related_name="novels")
     title = models.CharField(verbose_name="タイトル", max_length=100)
     description = models.CharField(verbose_name="説明", max_length=1000, null=True, blank=True)
     is_public = models.BooleanField(verbose_name="公開設定", default=True)

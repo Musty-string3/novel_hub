@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { FaFolderOpen } from "react-icons/fa6";
 
 const FolderItem = ({folders}) => {
     return (
