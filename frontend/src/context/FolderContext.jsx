@@ -15,6 +15,14 @@ const folderReducer = (state, {type, payload}) => {
         case "folders/upsert": {
             return state;
         }
+        case "folders/create": {
+            return [...state, payload];
+        }
+        case "folders/delete": {
+            return state.filter((folder) => (
+                folder.id !== payload
+            ));
+        }
         default: {
             return state;
         }

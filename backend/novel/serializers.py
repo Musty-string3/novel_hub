@@ -30,8 +30,9 @@ class NovelSerializer(serializers.ModelSerializer):
 
 
 class FolderSerializer(serializers.ModelSerializer):
-    ## accounts/からシリアライザを取得
-    user = UserSerializer()
+    ## accounts/からユーザーシリアライザを取得し、ユーザー状態は読み込み専用にする
+    user = UserSerializer(read_only=True)
+
     ## NOTE
     ## many=Trueは複数のnovelを配列で返すように指定
     ## read_only=TrueはAPI経由でFolderを作成、更新する際はnovelのデータを書き込み対象にしない
