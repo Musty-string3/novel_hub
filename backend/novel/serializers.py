@@ -5,12 +5,15 @@ from accounts.serializers import UserSerializer
 
 
 class NovelSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    # novels = FolderSerializer(, read_only=True)
+
     class Meta:
         model = Novel
         fields = [
             'id',
             'user',
-            'folder',
+            # 'folder',
             'title',
             'description',
             'is_public',

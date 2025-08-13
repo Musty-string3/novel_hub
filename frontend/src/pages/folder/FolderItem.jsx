@@ -20,7 +20,7 @@ const FolderItem = ({folders, handleDeleteFolder}) => {
                             <Button
                                 type="button"
                                 onClick={(e) => {
-                                    e.stopPropagation(); // ← これでリンク動作を止める
+                                    e.stopPropagation();
                                     handleDeleteFolder(folder.id);
                                 }}
                                 size="xs"

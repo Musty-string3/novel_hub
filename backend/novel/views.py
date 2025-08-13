@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from datetime import datetime, timedelta, timezone
 
 from rest_framework import status, generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -47,3 +48,44 @@ class FolderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     ## GET PATCH DELETEすべてで自分のフォルダしか触れないように制限
     def get_queryset(self):
         return Folder.objects.filter(user=self.request.user)
+
+
+class NovlesView(generics.CreateAPIView):
+    """
+    POSTを担当
+
+    小説の新規作成
+    """
+
+    serializer_class = NovelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        ## URLからどのフォルダかを判定する
+        id = self.kwargs.get("pk")
+        if not id:
+            raise ValidationError({"message": "フォルダが見つかりませんでした。"})
+
+        try:
+            folder = Folder.objects.get(id=id)
+        except Folder.DoesNotExist:
+            raise ValidationError({"message": "フォルダが見つかりませんでした。"})
+
+        serializer.save(user=self.request.user, folder=folder)
+
+
+class NovelUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET PATCH DELETEを担当
+
+    ログインユーザーの小説を1件取得取得
+    ログインユーザーの小説を1件更新
+    ログインユーザーの小説を1件削除
+    """
+
+    serializer_class = NovelSerializer
+    permission_classes = [IsAuthenticated]
+
+    ## GET PATCH DELETEすべてで自分のフォルダしか触れないように制限
+    def get_queryset(self):
+        return Novel.objects.filter(user=self.request.user)

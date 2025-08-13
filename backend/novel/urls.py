@@ -8,4 +8,6 @@ app_name = 'folder and novel'
 urlpatterns = [
     path("folders", FoldersView.as_view(), name="folder_list_create"),
     path("folders/<int:pk>", FolderUpdateDeleteView.as_view(), name="folder_update_delete"),
+    path("folders/<int:pk>/novels", NovlesView.as_view(), name="novle_create"),
+    path("novels/<int:pk>", NovelUpdateDeleteView.as_view(), name="novel_update_delete"),
 ]
