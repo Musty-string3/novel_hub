@@ -54,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(verbose_name="最終ログイン日時", blank=True, null=True)
     created_at = models.DateTimeField(verbose_name='データ作成日時', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='データ更新日時', auto_now=True)
-    
+
     ## 認証に使うフィールドを指定
     USERNAME_FIELD = "email"
     ## createsuperuser時に追加で必須にしたいフィールド
@@ -72,9 +72,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.full_clean()
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.email
-
     class Meta():
         verbose_name_plural = '02-01.ユーザー'
         db_table = 'user'
@@ -89,9 +86,6 @@ class Profile(models.Model):
     created_at = models.DateTimeField(verbose_name='データ作成日時', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='データ更新日時', auto_now=True)
 
-
-    def __str__(self):
-        return self.name
 
     class Meta():
         verbose_name_plural = '02-02.プロフィール'
