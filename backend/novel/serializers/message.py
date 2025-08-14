@@ -7,26 +7,19 @@ from .folder import *
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    novels = FolderSerializer(read_only=True)
 
     class Meta:
-        model = Novel
+        model = Message
         fields = [
             'id',
-            'novels',
-            'title',
-            'description',
-            'is_public',
-            'show_speaker',
-            'background_color',
-            'view_count',
-            'movie_url',
+            'character',
+            'message',
+            'direction',
+            'image_url',
             'created_at',
             'updated_at'
         ]
         read_only_fields = [
             'id',
-            'user',
-            'folder',
             'created_at',
         ]

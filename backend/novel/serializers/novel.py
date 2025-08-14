@@ -8,14 +8,14 @@ from .folder import *
 
 class NovelDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    message = MessageSerializer(read_only=True)
+    messages = MessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Novel
         fields = [
             'id',
             'user',
-            'message',
+            'messages',
             'title',
             'description',
             'is_public',
@@ -29,8 +29,7 @@ class NovelDetailSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'user',
-            'folder',
-            'message',
+            'messages',
             'created_at',
         ]
 
