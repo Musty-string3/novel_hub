@@ -8,7 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from .models import *
-from .serializers import *
+from .serializers.novel import *
+from .serializers.message import *
+from .serializers.folder import *
 
 
 class FoldersView(generics.ListCreateAPIView):
@@ -83,7 +85,7 @@ class NovelUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     ログインユーザーの小説を1件削除
     """
 
-    serializer_class = NovelSerializer
+    serializer_class = NovelDetailSerializer
     permission_classes = [IsAuthenticated]
 
     ## GET PATCH DELETEすべてで自分のフォルダしか触れないように制限
