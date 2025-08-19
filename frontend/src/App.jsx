@@ -10,6 +10,7 @@ import ProfileUpdate from './pages/Profile/ProfileUpdate'
 import FolderList from './pages/folder/FolderList'
 import FolderProvider from './context/FolderContext'
 import FolderDetail from './pages/folder/FolderDetail'
+import Novel from './pages/novel/Novel'
 
 import { Toaster } from "./components/ui/toaster";
 import './App.css'
@@ -39,6 +40,7 @@ function App() {
 				<Route path="/profile/update" element={<PrivateRoute><ProfileUpdate /></PrivateRoute>} />
 				<Route path="/folders" element={<PrivateRoute><FolderProvider><FolderList/></FolderProvider></PrivateRoute>} />
 				<Route path="/folders/:id" element={<PrivateRoute><FolderProvider><FolderDetail/></FolderProvider></PrivateRoute>} />
+				<Route path="/novels/:id" element={<PrivateRoute><Novel /></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>
   	)

@@ -7,6 +7,7 @@ from .folder import *
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    direction_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -14,7 +15,9 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'character',
             'message',
+            'order',
             'direction',
+            'direction_label',
             'image_url',
             'created_at',
             'updated_at'
@@ -23,3 +26,6 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
         ]
+
+    def get_direction_label(self, obj):
+        return obj.get_direction_display()
