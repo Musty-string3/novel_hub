@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from datetime import datetime, timedelta, timezone
+from django.db import transaction
 
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
@@ -97,8 +98,8 @@ class MessagesView(generics.ListCreateAPIView):
     """
     GET POSTを担当
 
-    1つの小説のメッセージの一覧を取得
-    1つの小説のメッセージを新規作成
+    小説内のメッセージの一覧を取得
+    小説内のメッセージを新規作成
     """
 
     serializer_class = MessageSerializer
@@ -142,3 +143,58 @@ class MessagesUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             raise ValidationError({"message": "小説が見つかりませんでした。"})
 
         return Message.objects.filter(novel=novel)
+
+    ## NOTE perform_update: 保存処理をカスタマイズしたいとき用
+    ## NOTE update: 更新リクエスト全体の流れやレスポンスをカスタマイズしたいとき用
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        target_order = instance.order
+        novel = instance.novel
+        direction = self.request.data.get("direction_type")
+
+        if direction in ["up", "down"]:
+            print("メッセージの上下変更開始")
+            max_order = Message.objects.filter(novel=novel).count()
+
+            ## ユーザーが選択したメッセージの上下の表示順を計算
+            if (direction == "up" and target_order > 1):
+                swap_order = target_order - 1
+            elif (direction == "down" and target_order < max_order):
+                swap_order = target_order + 1
+
+            ## 上下を変更したことにより、別のメッセージの表示順も切り替える
+            try:
+                swap_message = Message.objects.get(novel=novel, order=swap_order)
+            except Message.DoesNotExist:
+                ## 変更される側のメッセージを取得できない場合は何もせずに終了
+                return serializer.save()
+
+            ## ユーザーが選択したメッセージと交換するメッセージの入れ替え
+            with transaction.atomic():
+                ## ユニーク制約でorderが重複することは許されないため、一時的にorderの値を仮で設定する
+                swap_message.order = -1
+                swap_message.save()
+
+                instance.order = swap_order
+                instance.save()
+
+                swap_message.order = target_order
+                swap_message.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            ## メッセージ内容の変更
+            return super().update(request, *args, **kwargs)
+
+
+    def perform_destroy(self, instance):
+        novel = instance.novel
+        order_to_delete = instance.order
+        instance.delete()
+
+        ## 削除したインスタンスよりも表示順が下のものは1つずつ繰り上げる
+        messages = Message.objects.filter(novel=novel, order__gt=order_to_delete).order_by("order")
+        for message in messages:
+            message.order -= 1
+            message.save(update_fields=["order", "updated_at"])

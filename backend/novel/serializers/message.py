@@ -7,6 +7,8 @@ from .folder import *
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    ## 表示順はバリデーションview側で自動採番しているため、シリアライザ側ではバリデーションに引っかからないようにする
+    order = serializers.IntegerField(required=False)
     direction_label = serializers.SerializerMethodField()
 
     class Meta:
